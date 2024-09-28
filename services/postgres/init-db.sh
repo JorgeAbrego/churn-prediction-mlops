@@ -39,3 +39,70 @@ PGPASSWORD=$POSTGRES_PASSWORD psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER
         TABLESPACE = pg_default;
     GRANT ALL PRIVILEGES ON DATABASE app_db TO app_user;
 EOSQL
+
+# Create table in prediction_db
+PGPASSWORD=$PG_APP_PWD psql -v ON_ERROR_STOP=1 --username "app_user" --dbname "app_db" <<-EOSQL
+    CREATE TABLE IF NOT EXISTS customer_data (
+        "customerID" TEXT,
+        "gender" TEXT,
+        "SeniorCitizen" INTEGER,
+        "Partner" VARCHAR,
+        "Dependents" VARCHAR,
+        "tenure" INTEGER,
+        "PhoneService" VARCHAR,
+        "MultipleLines" VARCHAR,
+        "InternetService" VARCHAR,
+        "OnlineSecurity" VARCHAR,
+        "OnlineBackup" VARCHAR,
+        "DeviceProtection" VARCHAR,
+        "TechSupport" VARCHAR,
+        "StreamingTV" VARCHAR,
+        "StreamingMovies" VARCHAR,
+        "Contract" VARCHAR,
+        "PaperlessBilling" VARCHAR,
+        "PaymentMethod" VARCHAR,
+        "MonthlyCharges" FLOAT,
+        "TotalCharges" FLOAT NULL,
+        "Churn" VARCHAR
+    );
+
+
+    CREATE TABLE IF NOT EXISTS prediction_logs (
+        "customerID" TEXT,
+        "gender" TEXT,
+        "SeniorCitizen" INTEGER,
+        "Partner" VARCHAR,
+        "Dependents" VARCHAR,
+        "tenure" INTEGER,
+        "PhoneService" VARCHAR,
+        "MultipleLines" VARCHAR,
+        "InternetService" VARCHAR,
+        "OnlineSecurity" VARCHAR,
+        "OnlineBackup" VARCHAR,
+        "DeviceProtection" VARCHAR,
+        "TechSupport" VARCHAR,
+        "StreamingTV" VARCHAR,
+        "StreamingMovies" VARCHAR,
+        "Contract" VARCHAR,
+        "PaperlessBilling" VARCHAR,
+        "PaymentMethod" VARCHAR,
+        "MonthlyCharges" FLOAT,
+        "TotalCharges" FLOAT NULL,
+        "Churn" VARCHAR,
+        "prediction" INTEGER,
+        "probability" FLOAT,
+        "model_name" VARCHAR,
+        "model_version" VARCHAR,
+        "prediction_date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+EOSQL
+
+PGPASSWORD=$POSTGRES_PASSWORD psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    \c app_db;
+
+    COPY customer_data
+    FROM '/tmp/data.csv' 
+    DELIMITER ',' 
+    CSV HEADER
+    NULL AS ' ';
+EOSQL

@@ -2,18 +2,21 @@
 x-airflow-common:
   &airflow-common
   image: ${AIRFLOW_IMAGENAME:-apache/airflow:2.10.1-python3.10}
+  env_file:
+    - .env
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow_user:${PG_AIRFLOW_PWD}@postgres/airflow_db
     AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
   volumes:
-    - ${PROJECT_PATH:-.}/airflow/dags:/opt/airflow/dags
-    - ${PROJECT_PATH:-.}/airflow/logs:/opt/airflow/logs
+    - ${PROJECT_PATH:-.}/services/airflow/dags:/opt/airflow/dags
+    - ${PROJECT_PATH:-.}/services/airflow/logs:/opt/airflow/logs
+    - ${PROJECT_PATH:-.}/services/airflow/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -39,6 +42,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./services/postgres:/docker-entrypoint-initdb.d
+      - ./data/WA_Fn-UseC_-Telco-Customer-Churn.csv:/tmp/data.csv
     ports:
       - 5432:5432
 
@@ -305,12 +309,12 @@ services:
       - xpack.security.transport.ssl.certificate=certs/elasticsearch/elasticsearch.crt
       - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.license.self_generated.type=basic #${LICENSE}
-    #mem_limit: ${ES_MEM_LIMIT}
-    #ulimits:
-    #  memlock:
-    #    soft: -1
-    #    hard: -1
+      - xpack.license.self_generated.type=${LICENSE}
+    mem_limit: ${ES_MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     healthcheck:
       test:
         [
@@ -347,7 +351,7 @@ services:
       #- XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
       #- XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
       #- XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
-    #mem_limit: ${KB_MEM_LIMIT}
+    mem_limit: ${KB_MEM_LIMIT}
     healthcheck:
       test:
         [
@@ -392,7 +396,7 @@ services:
         condition: service_healthy
       kibana:
         condition: service_healthy
-   #mem_limit: ${LS_MEM_LIMIT}
+    mem_limit: ${LS_MEM_LIMIT}
 
 
 volumes:

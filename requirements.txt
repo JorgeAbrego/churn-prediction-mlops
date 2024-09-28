@@ -9,3 +9,4 @@ python-dotenv==1.0.1
 scikit-learn==1.5.1
 seaborn==0.13.2
 python-logstash==0.4.8
+psycopg2-binary==2.9.9

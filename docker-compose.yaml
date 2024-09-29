@@ -398,6 +398,27 @@ services:
         condition: service_healthy
     mem_limit: ${LS_MEM_LIMIT}
 
+  #--------------------------------------------------------------------------------------------------------------------------------------#
+  # Grafana Dashboard Server
+  #--------------------------------------------------------------------------------------------------------------------------------------#
+  grafana:
+    image: grafana/grafana-enterprise:11.0.1
+    container_name: grafana
+    user: "472"
+    env_file:
+      - .env
+    volumes:
+      - ./services/grafana/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ./services/grafana/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./services/grafana/dashboards:/opt/grafana/dashboards
+      - ./services/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: always 
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
@@ -406,4 +427,5 @@ volumes:
   kb_data:
   ls_data:
   elk_data:
+  grafana-data:
   certs:

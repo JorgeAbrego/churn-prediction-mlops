@@ -17,7 +17,7 @@ default_args = {
     'retry_delay'           : timedelta(minutes=5)
 }
 
-with DAG('batch_pred_pipeline', default_args=default_args, schedule_interval="0 0 * * *", catchup=False) as dag:
+with DAG('batch_pred_pipeline', default_args=default_args, schedule_interval="0 1 * * *", catchup=False) as dag:
     start_dag = DummyOperator(
         task_id='start_dag'
         )

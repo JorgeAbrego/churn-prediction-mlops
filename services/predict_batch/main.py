@@ -76,7 +76,7 @@ def predict(query, model):
     data['prediction'] = y
     data['probability'] = y_prob[:, 1]
     data['model_name'] = model_name
-    data['model_version'] = model_alias
+    data['model_version'] = model_alias["champion"]
     save_data(data)
     sleep(3)
     logger.info("Predict job completed")

@@ -4,6 +4,8 @@ from time import sleep
 from sqlalchemy import create_engine
 from utils.logger import logger
 from utils.mlflow_handler import MLflowHandler
+from datetime import datetime # <<<---
+import random as rd # <<<---
 
 logger.info("Predict job started")
 
@@ -77,13 +79,15 @@ def predict(query, model):
     data['prediction'] = y
     data['probability'] = y_prob[:, 1]
     data['model_name'] = model_name
-    data['model_version'] = model_alias
+    data['model_version'] = model_alias["champion"]
+    data["prediction_date"] = datetime(2024, 9, 27, 0, 1, 39) # <<<---
     save_data(data)
     sleep(3)
     logger.info("Predict job completed")
     return None
 
 if __name__ == "__main__":
-    query = "SELECT * FROM customer_data ORDER BY random() LIMIT 10" 
+    rdn = rd.randint(100, 200) # <<<---
+    query = f"SELECT * FROM customer_data ORDER BY random() LIMIT {rdn}"  # <<<---
     MODEL_NAME = "telco_customer_churn" 
     result = predict(query, MODEL_NAME)
